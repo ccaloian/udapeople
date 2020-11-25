@@ -32,7 +32,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -H "Content-Type: text/plain" -H << parameters.memstash_token >> --request GET https://api.memstash.io/values/migrations)
+            SUCCESS=$(curl -H "Content-Type: text/plain" -H << parameters.memstash-token >> --request GET https://api.memstash.io/values/migrations)
             if(( $SUCCESS=="success" ))
             then
               cd ~/project/backend
