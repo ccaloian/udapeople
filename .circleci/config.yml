@@ -11,7 +11,7 @@ commands:
       backend-stack-name:
         description: frontend stack name
         type: string
-        default: udapeople-frontend-${CIRCLE_WORKFLOW_ID}
+        default: udapeople-backend-${CIRCLE_WORKFLOW_ID}
     steps:
       - run:
           name: Destroy environments
@@ -153,12 +153,11 @@ jobs:
           command: |
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
-              --output text >> ./.circleci/ansible/inventory.txt
-            cat ./.circleci/ansible/inventory.txt
+              --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - .circleci/ansible/inventory.txt
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment      
 
   configure-infrastructure:
@@ -178,8 +177,8 @@ jobs:
           name: Configure server
           command: |
             ls -la ~/
-            cat ~/.circleci/ansible/inventory.txt
-            ansible-playbook -i ~/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            cat ~/project/.circleci/ansible/inventory.txt
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment
 
   # run-migrations:
