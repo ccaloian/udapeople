@@ -146,11 +146,12 @@ jobs:
           command: |
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
-              --output text >> .circleci/ansible/inventory.txt
+              --output text >> ./.circleci/ansible/inventory.txt
+            cat ./.circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - .circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
@@ -169,9 +170,9 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ls ~/
-            cat .circleci/ansible/inventory.txt
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            ls -la ~/
+            cat ~/.circleci/ansible/inventory.txt
+            ansible-playbook -i ~/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       # Here's where you will add some code to rollback on failure      
 
   # run-migrations:
