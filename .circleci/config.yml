@@ -173,6 +173,8 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
+            apk -Uuv add groff less python py-pip
+            pip install awscli
       - run:
           name: Configure server
           command: |
