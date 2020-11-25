@@ -26,7 +26,7 @@ commands:
       memstash-token:
         description: Memstash token for migration result
         type: string
-        default: migration_${CIRCLE_WORKFLOW_ID}"
+        default: "token:migration_${CIRCLE_WORKFLOW_ID}"
     steps:
       - run:
           name: Revert migrations
@@ -40,7 +40,8 @@ commands:
               npm run migration:revert
               exit 1
             fi
-            
+curl -H "Content-Type: text/plain" -H 2ccd5493-ad05-4d7c-a3ee-1fab6e0a6967 --request GET https://api.memstash.io/values/migrations
+         
 jobs:
   build-frontend:
     docker:
@@ -192,19 +193,25 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install awscli
+      - run:
           name: Run migrations
           command: |
             cd backend
             npm install
+            npm audit fix --audit-level=critical --force
             MIGRATION_OUTPUT=$(npm run migrations)
       - run:
           name: Send migration results to memstash
           command: |
             if grep -q "has been executed successfully" $MIGRATION_OUTPUT
             then
-              curl -H "Content-Type: text/plain" -H "token: migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
+              curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
             else
-              curl -H "Content-Type: text/plain" -H "token: migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "fail" https://api.memstash.io/values/migrations
+              curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "fail" https://api.memstash.io/values/migrations
             fi
       - destroy-environment
 
