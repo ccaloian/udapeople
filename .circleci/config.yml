@@ -146,12 +146,11 @@ jobs:
           command: |
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
-              --output text >> ./.circleci/ansible/inventory.txt
-            cat ./.circleci/ansible/inventory.txt
+              --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: ~/.circleci/ansible/ 
           paths:
-            - .circleci/ansible/inventory.txt
+            - inventory.txt
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
@@ -162,7 +161,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["07:08:2f:2a:e9:36:4b:c7:c6:92:e9:7f:8e:f1:bf:f2"]
       - attach_workspace:
-          at: ~/
+          at: .circleci/ansible/
       - run:
           name: Install dependencies
           command: |
@@ -171,8 +170,8 @@ jobs:
           name: Configure server
           command: |
             ls -la ~/
-            cat ~/.circleci/ansible/inventory.txt
-            ansible-playbook -i ~/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            cat .circleci/ansible/inventory.txt
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       # Here's where you will add some code to rollback on failure      
 
   # run-migrations:
