@@ -154,13 +154,13 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
+              --filters "Name=tag:Name,Value=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
               --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - tmp-project/.circleci/ansible/inventory.txt
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment      
 
   configure-infrastructure:
@@ -182,8 +182,8 @@ jobs:
           name: Configure server
           command: |
             ls -la ~/
-            cat ~/tmp-project/.circleci/ansible/inventory.txt
-            ansible-playbook -i ~/tmp-project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            cat ~/project/.circleci/ansible/inventory.txt
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment
 
   run-migrations:
@@ -221,7 +221,7 @@ jobs:
           name: Get backend url
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
+              --filters "Name=tag:Name,Value=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
             export API_URL="http://${BACKEND_IP}:3030"
