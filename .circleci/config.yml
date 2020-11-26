@@ -33,7 +33,7 @@ commands:
           when: on_fail
           command: |
             export SUCCESS=$(curl -H "Content-Type: text/plain" -H << parameters.memstash-token >> --request GET https://api.memstash.io/values/migrations)
-            if(( $SUCCESS=="success" ))
+            if [ $SUCCESS=="success" ]
             then
               cd ~/project/backend
               npm install
@@ -202,13 +202,16 @@ jobs:
             npm install
             npm audit fix --audit-level=critical --force
             export MIGRATION_OUTPUT=$(npm run migrations)
+            echo "MIGRATION_OUTPUT=$MIGRATION_OUTPUT"
       - run:
           name: Send migration results to memstash
           command: |
             if echo $MIGRATION_OUTPUT | grep -q "success"
             then
+              echo "success"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
             else
+              else "fail"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "fail" https://api.memstash.io/values/migrations
             fi
       - destroy-environment
@@ -221,7 +224,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update install tar gzip nodejs npm curl
+            yum install -y tar gzip nodejs npm curl
       - run:
           name: Get backend url
           command: |
