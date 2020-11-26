@@ -201,12 +201,11 @@ jobs:
             cd backend
             npm install
             npm audit fix --audit-level=critical --force
-            export MIGRATION_OUTPUT=$(npm run migrations)
-            echo "MIGRATION_OUTPUT=$MIGRATION_OUTPUT"
+            npm run migrations > migration_output.log
       - run:
           name: Send migration results to memstash
           command: |
-            if echo $MIGRATION_OUTPUT | grep -q "success"
+            if grep -q "has been executed successfully" migration_output.log
             then
               echo "success"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
@@ -224,7 +223,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum install -y tar gzip nodejs npm curl
+            yum install -y tar gzip
+            curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+            yum install -y nodejs
       - run:
           name: Get backend url
           command: |
