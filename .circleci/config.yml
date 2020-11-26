@@ -211,7 +211,7 @@ jobs:
               echo "success"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
             else
-              else "fail"
+              echo "fail"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "fail" https://api.memstash.io/values/migrations
             fi
       - destroy-environment
