@@ -12,11 +12,16 @@ commands:
         description: frontend stack name
         type: string
         default: udapeople-backend-${CIRCLE_WORKFLOW_ID}
+      bucket-name:
+        description: frontend S3 bucket name
+        type: string
+        default: udapeople-"${CIRCLE_WORKFLOW_ID}"
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
+            aws s3 rm s3://<< parameters.bucket-name >> --recursive
             aws cloudformation delete-stack --stack-name << parameters.frontend-stack-name >>
             aws cloudformation delete-stack --stack-name << parameters.backend-stack-name >>
 
@@ -203,6 +208,9 @@ jobs:
             npm install
             npm audit fix --audit-level=critical --force
             npm run migrations > migrations.txt
+            echo "------------------------------------------------------------------"
+            cat migrations.txt
+            echo "------------------------------------------------------------------"
             if grep -q "has been executed successfully" migrations.txt
             then
               echo "PUT success to MEMSTASH"
@@ -231,7 +239,7 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
+            API_URL="http://${BACKEND_IP}:3030"
             curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request PUT --data "$API_URL" https://api.memstash.io/values/api_url
             echo "API_URL=${API_URL}"
       - run:
@@ -267,7 +275,7 @@ jobs:
             npm i
             npm run build
             tar -C dist -czvf backend_artifact.tar.gz .
-            cp backend_artifact.tar.gz ../.circleci/ansible/roles/deploy/files/
+            cp ./backend_artifact.tar.gz ../.circleci/ansible/roles/deploy/files/
             cd ..
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
@@ -283,13 +291,10 @@ jobs:
           command: |
             apk add --update curl tar gzip nodejs npm curl
       - run:
-          name: Get backend url
+          name: Get backend url and run smoke test
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
             echo "BACKEND API_URL=$API_URL"
-      - run:
-          name: Backend smoke test.
-          command: |
             if curl -s $API_URL > backend_curl_out
             then
               return 0
