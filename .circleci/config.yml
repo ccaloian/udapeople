@@ -32,7 +32,8 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            export SUCCESS=$(curl -H "Content-Type: text/plain" -H << parameters.memstash-token >> --request GET https://api.memstash.io/values/migrations)
+            SUCCESS=$(curl -H "Content-Type: text/plain" -H << parameters.memstash-token >> --request GET https://api.memstash.io/values/migrations)
+            echo "SUCCESS=$SUCCESS"
             if [ $SUCCESS=="success" ]
             then
               cd ~/project/backend
@@ -196,21 +197,18 @@ jobs:
             sudo apt-get update
             sudo apt-get install awscli
       - run:
-          name: Run migrations
+          name: Run migrations and send results to memstash
           command: |
             cd backend
             npm install
             npm audit fix --audit-level=critical --force
-            npm run migrations > migration_output.log
-      - run:
-          name: Send migration results to memstash
-          command: |
-            if grep -q "has been executed successfully" migration_output.log
+            npm run migrations > migrations.txt
+            if grep -q "has been executed successfully" migrations.txt
             then
-              echo "success"
+              echo "PUT success to MEMSTASH"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
             else
-              echo "fail"
+              echo "PUT fail to MEMSTASH"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "fail" https://api.memstash.io/values/migrations
             fi
       - destroy-environment
@@ -224,7 +222,7 @@ jobs:
           name: Install dependencies
           command: |
             yum install -y tar gzip
-            curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+            curl -sL https://rpm.nodesource.com/setup_14.x | bash -
             yum install -y nodejs
       - run:
           name: Get backend url
@@ -269,7 +267,6 @@ jobs:
             npm i
             npm run build
             tar -C dist -czvf backend_artifact.tar.gz .
-            mkdir -p ../.circleci/ansible/roles/deploy/files
             mv backend_artifact.tar.gz ../.circleci/ansible/roles/deploy/files/
             cd ..
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
@@ -284,12 +281,12 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl
+            apk add --update curl tar gzip nodejs npm curl
       - run:
           name: Get backend url
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
-            echo "Backend API_URL=$API_URL"
+            echo "BACKEND API_URL=$API_URL"
       - run:
           name: Backend smoke test.
           command: |
@@ -303,7 +300,7 @@ jobs:
           name: Frontend smoke test.
           command: |
             export URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-east-1.amazonaws.com"
-            echo "Frontend URL=$URL"
+            echo "FRONTEND URL=$URL"
             if curl -s ${URL} | grep "Welcome" > frontend_curl_out
             then
               return 0
