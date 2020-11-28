@@ -38,7 +38,7 @@ commands:
             then
               cd ~/project/backend
               npm install
-              npm run migration:revert
+              npm run migrations:revert
             fi
          
 jobs:
@@ -267,7 +267,7 @@ jobs:
             npm i
             npm run build
             tar -C dist -czvf backend_artifact.tar.gz .
-            mv backend_artifact.tar.gz ../.circleci/ansible/roles/deploy/files/
+            cp backend_artifact.tar.gz ../.circleci/ansible/roles/deploy/files/
             cd ..
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
