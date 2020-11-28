@@ -213,10 +213,10 @@ jobs:
             echo "------------------------------------------------------------------"
             if grep -q "has been executed successfully" migrations.txt
             then
-              echo "PUT success to MEMSTASH"
+              echo "PUT 'success' to MEMSTASH"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
             else
-              echo "PUT fail to MEMSTASH"
+              echo "PUT 'fail' to MEMSTASH"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "fail" https://api.memstash.io/values/migrations
             fi
       - destroy-environment
@@ -274,7 +274,7 @@ jobs:
             cd backend
             npm i
             npm run build
-            tar -C dist -czvf backend_artifact.tar.gz ../.circleci/ansible/roles/deploy/files/
+            tar -C dist -czvf backend_artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
             cd ..
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
