@@ -1,21 +1,82 @@
 ---
-- name: "upgrade packages."
-  become: true
+- name: "update apt packages"
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
+  become: yes
   apt:
     upgrade: "yes"
 
-- name: "install dependencies."
-  become: true
+- name: "remove dependencies that are no longer required"
+  become: yes
   apt:
-    name: ["nodejs", "npm", "tar"]
-    state: latest
-    update_cache: yes
+    autoremove: yes
+
+#- name: "install dependencies"
+#  become: yes
+#  apt:
+#    name: ["nodejs", "npm", "tar"]
+#    state: latest
+#    update_cache: yes
+
+#- name: "install node"
+#  become: yes
+#  shell: |
+#    apt-get install -y build-essential
+#    apt-get install -y curl openssl libssl-dev
+#    git clone https://github.com/joyent/node.git
+#    cd node
+#    git checkout v0.10.24
+#    ./configure
+#    make
+#    make install
+
+#- name: "install pm2"
+#  become: yes
+#  npm:
+#    name: pm2
+#    global: yes
+#    production: yes
+#    state: present
+
+#- name: "get application code"
+#  git:
+#    repo: https://github.com/ccaloian/udapeople.git
+#    dest: /home/ubuntu/udapeople
+
+
+#- name: "upgrade packages."
+#  become: true
+#  apt:
+#    upgrade: "yes"
+
+#- name: "install nodejs"
+#  become: true
+#  shell: |
+#    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+#    . ~/.nvm/nvm.sh
+#    nvm install node
+#    node -e "console.log('Running Node.js ' + process.version)"
+
+#- name: "install dependencies."
+#  become: true
+#  apt:
+#    name: ["tar"]
+#    state: latest
+#    update_cache: yes
+
+- name: "Make dist dir"
+  file:
+    path: /home/ubuntu/dist
+    state: directory
 
 - name: "Copy dist files"
   become: true
   copy:
     src: backend_artifact.tar.gz
-    dest: ./dist
+    dest: /home/ubuntu/dist/backend_artifact.tar.gz
 
 - name: "Unpack dist files"
   become: true
@@ -24,12 +85,50 @@
     tar -xzf backend_artifact.tar.gz
     rm backend_artifact.tar.gz
 
-- name: Delete old pm2 process
-  become: true
-  command: pm2 delete app
-  ignore_errors: yes
+#- name: Delete old pm2 process
+#  become: true
+#  command: pm2 delete app
+#  ignore_errors: yes
 
 - name: Executing node
   become: true
   shell: |
-    pm2 start -x -i 4 --name "app" ./dist/main.js
+    pm2 start -x -i 4 --name "app" /home/ubuntu/dist/main.js
+
+
+
+# ---
+# - name: "upgrade packages."
+#   become: true
+#   apt:
+#     upgrade: "yes"
+
+# - name: "install dependencies."
+#   become: true
+#   apt:
+#     name: ["nodejs", "npm", "tar"]
+#     state: latest
+#     update_cache: yes
+
+# - name: "Copy dist files"
+#   become: true
+#   copy:
+#     src: backend_artifact.tar.gz
+#     dest: ./dist
+
+# - name: "Unpack dist files"
+#   become: true
+#   shell: |
+#     cd dist
+#     tar -xzf backend_artifact.tar.gz
+#     rm backend_artifact.tar.gz
+
+# - name: Delete old pm2 process
+#   become: true
+#   command: pm2 delete app
+#   ignore_errors: yes
+
+# - name: Executing node
+#   become: true
+#   shell: |
+#     pm2 start -x -i 4 --name "app" ./dist/main.js

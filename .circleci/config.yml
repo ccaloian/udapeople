@@ -239,7 +239,7 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            API_URL="http://${BACKEND_IP}:3030"
+            API_URL="http://${BACKEND_IP}:3030/api/status"
             curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request PUT --data "$API_URL" https://api.memstash.io/values/api_url
             echo "API_URL=${API_URL}"
       - run:
@@ -276,6 +276,15 @@ jobs:
             npm run build
             tar -C dist -czvf backend_artifact.tar.gz .
             cd ..
+            echo "------------------------------------------------------------------"
+            echo "pwd: $(pwd)"
+            echo "------------------------------------------------------------------"
+            ls -la
+            echo "------------------------------------------------------------------"
+            ls ~/project
+            echo "------------------------------------------------------------------"
+            find . -name "backend_artifact.tar.gz"
+            echo "------------------------------------------------------------------"
             mv backend/backend_artifact.tar.gz .circleci/ansible/roles/deploy/files
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
