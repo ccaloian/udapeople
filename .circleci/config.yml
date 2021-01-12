@@ -37,9 +37,9 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -H "Content-Type: text/plain" -H << parameters.memstash-token >> --request GET https://api.memstash.io/values/migrations)
-            echo "SUCCESS=$SUCCESS"
-            if [ $SUCCESS=="success" ]
+            MIGRATION_OUTPUT=$(curl -H "Content-Type: text/plain" -H << parameters.memstash-token >> --request GET https://api.memstash.io/values/migrations)
+            echo "Migration Output: $MIGRATION_OUTPUT"
+            if [ "$MIGRATION_OUTPUT" == "success" ]
             then
               cd ~/project/backend
               npm install
@@ -211,7 +211,7 @@ jobs:
             echo "------------------------------------------------------------------"
             cat migrations.txt
             echo "------------------------------------------------------------------"
-            if grep -q "has been executed successfully" migrations.txt
+            if [[ $(cat migrations.txt) =~ "has been executed successfully" ]]
             then
               echo "PUT 'success' to MEMSTASH"
               curl -H "Content-Type: text/plain" -H "token:migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "success" https://api.memstash.io/values/migrations
@@ -241,7 +241,7 @@ jobs:
               --output text)
             API_URL="http://${BACKEND_IP}:3030/api/status"
             curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request PUT --data "$API_URL" https://api.memstash.io/values/api_url
-            echo "API_URL=${API_URL}"
+            echo "API_URL: ${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
@@ -303,8 +303,8 @@ jobs:
           name: Get backend url and run smoke test
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
-            echo "BACKEND API_URL=$API_URL"
-            if curl -s $API_URL > backend_curl_out
+            echo "Backend API_URL: $API_URL"
+            if curl -s $API_URL > curl_backend_out.txt
             then
               return 0
             else
@@ -314,8 +314,9 @@ jobs:
           name: Frontend smoke test.
           command: |
             export URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-east-1.amazonaws.com"
-            echo "FRONTEND URL=$URL"
-            if curl -s ${URL} | grep "Welcome" > frontend_curl_out
+            echo "Frontend URL: $URL"
+            curl -s ${URL} > curl_frontend_out.txt
+            if [[ $(cat curl_frontend_out.txt) =~ "Welcome" ]]
             then
               return 0
             else
