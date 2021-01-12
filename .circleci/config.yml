@@ -42,7 +42,6 @@ commands:
             if [ "$MIGRATION_OUTPUT" == "success" ]
             then
               cd ~/project/backend
-              npm install
               npm run migrations:revert
             fi
          
@@ -226,6 +225,9 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      # Add frontend-build-2 and remove the install+build steps below
+      - restore_cache:
+          keys: [backend-build-2]
       - run:
           name: Install dependencies
           command: |
@@ -255,6 +257,7 @@ jobs:
                     
   deploy-backend:
     docker:
+      # FIXME: is node image enough?
       - image: python:3.7-alpine3.11
     steps:
       - checkout
@@ -300,7 +303,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum install tar gzip curl
+            yum install -y tar gzip
+            curl -sL https://rpm.nodesource.com/setup_14.x | bash -
+            yum install -y nodejs
       - run:
           name: Frontend smoke test.
           command: |
