@@ -272,7 +272,7 @@ jobs:
           name: Deploy backend
           command: |
             cd backend
-            npm i
+            npm install
             npm run build
             tar -C dist -czvf backend_artifact.tar.gz .
             cd ..
@@ -292,24 +292,15 @@ jobs:
 
   smoke-test:
     docker:
-      - image: python:3.7-alpine3.11 
+      - image: amazon/aws-cli
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build-2]
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl tar gzip nodejs npm curl
-      - run:
-          name: Get backend url and run smoke test
-          command: |
-            export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
-            echo "Backend API_URL: $API_URL"
-            if curl -s $API_URL > curl_backend_out.txt
-            then
-              return 0
-            else
-              return 1
-            fi
+            yum install tar gzip curl
       - run:
           name: Frontend smoke test.
           command: |
@@ -317,6 +308,17 @@ jobs:
             echo "Frontend URL: $URL"
             curl -s ${URL} > curl_frontend_out.txt
             if [[ $(cat curl_frontend_out.txt) =~ "Welcome" ]]
+            then
+              return 0
+            else
+              return 1
+            fi
+      - run:
+          name: Get backend url and run smoke test
+          command: |
+            export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
+            echo "Backend API_URL: $API_URL"
+            if curl -s $API_URL > curl_backend_out.txt
             then
               return 0
             else
