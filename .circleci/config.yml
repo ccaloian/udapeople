@@ -70,7 +70,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-build-2]
       - run:
           name: Back-end build
           command: |
@@ -79,7 +79,7 @@ jobs:
             npm run build
       - save_cache:
           paths: [backend/node_modules]
-          key: backend-build
+          key: backend-build-2
 
   test-frontend:
     docker:
@@ -100,7 +100,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-build-2]
       - run:
           name: Back-end test
           command: |
@@ -126,7 +126,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-build-2]
       - run:
           name: Scan backend
           command: |
@@ -196,6 +196,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build-2]
       - run:
           name: Install dependencies
           command: |
@@ -205,8 +207,6 @@ jobs:
           name: Run migrations and send results to memstash
           command: |
             cd backend
-            npm install
-            npm audit fix --audit-level=critical --force
             npm run migrations > migrations.txt
             echo "------------------------------------------------------------------"
             cat migrations.txt
