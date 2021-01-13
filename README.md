@@ -1,4 +1,5 @@
-[![CircleCI](https://circleci.com/gh/circleci/circleci-docs.svg?style=svg)](https://circleci.com/gh/circleci/circleci-docs)
+[![ccaloian](https://circleci.com/gh/ccaloian/udapeople.svg?style=shield)](https://app.circleci.com/gh/ccaloian/udapeople)
+
 
 ## Give your Application Auto-Deploy Superpowers
 
