@@ -21,18 +21,38 @@
 #     src: /root/project/backend
 #     dest: /home/ubuntu
 
-- name: Install Node modules
-  become: true
-  shell: |
-    cd /home/ubuntu/udapeople/backend
-    npm install
+- name: "Make dist dir"
+  file:
+    path: /home/ubuntu/udapeople/backend/dist
+    state: directory
 
-- name: Building backend service
+- name: "Copy dist files"
+  become: true
+  copy:
+    src: backend_artifact.tar.gz
+    dest: /home/ubuntu/udapeople/backend/dist/backend_artifact.tar.gz
+
+- name: Unpack dist files and prestart:prod
   become: true
   shell: |
+    cd /home/ubuntu/udapeople/backend/dist
+    tar -xzf backend_artifact.tar.gz
+    rm backend_artifact.tar.gz
     cd /home/ubuntu/udapeople/backend
-    npm run build
     npm run prestart:prod
+
+# - name: Install Node modules
+#   become: true
+#   shell: |
+#     cd /home/ubuntu/udapeople/backend
+#     npm install
+
+# - name: Building backend service
+#   become: true
+#   shell: |
+#     cd /home/ubuntu/udapeople/backend
+#     npm run build
+#     npm run prestart:prod
         
 - name: Executing node
   become: true
