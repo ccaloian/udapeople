@@ -16,15 +16,19 @@
     state: present
 
 - name: Copy backend dist files to remote server
+  become: true
   copy:
     src: /root/project/backend
     dest: /home/ubuntu
 
 - name: Install Node modules
+  become: true
   shell: |
     cd /home/ubuntu/backend
     npm install
+
 - name: Building backend service
+  become: true
   shell: |
     cd /home/ubuntu/backend
     npm run build
@@ -38,7 +42,7 @@
     pm2 ls
 
 - name: start pm2 for dist/main.js
-  become: no
+  become: true
   shell: pm2 start main.js
   args:
     chdir: /home/ubuntu/backend/dist
