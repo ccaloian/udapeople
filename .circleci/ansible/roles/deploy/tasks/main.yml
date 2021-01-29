@@ -85,16 +85,33 @@
     tar -xzf backend_artifact.tar.gz
     rm backend_artifact.tar.gz
 
+- name: Prestart prod
+  shell: npm run prestart:prod
+        
+- name: Executing node
+  become: true
+  shell: |
+    cd /home/ubuntu/dist
+    pm2 start npm --name backend -- start
+    pm2 ls
+
+- name: start pm2 for dist/main.js
+  become: no
+  shell: pm2 start main.js
+  args:
+    chdir: /home/ubuntu/dist
+
+
 #- name: Delete old pm2 process
 #  become: true
 #  command: pm2 delete app
 #  ignore_errors: yes
 
 # old pm2 command: pm2 start -x -i 4 --name "app" /home/ubuntu/dist/main.js
-- name: Executing node
-  become: true
-  shell: |
-    pm2 start npm -- run start
+# - name: Executing node
+#   become: true
+#   shell: |
+#     pm2 start npm -- run start
 
 
 
