@@ -189,6 +189,16 @@ jobs:
           name: Configure server
           command: |
             ls -la ~/
+            echo ENVIROMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             cat ~/project/.circleci/ansible/inventory.txt
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment
@@ -287,6 +297,20 @@ jobs:
             npm install
             npm run build
             cd ..
+            echo "------------------------------------------------------------------"
+            echo ENVIROMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+            echo "------------------------------------------------------------------"
+            cat backend/.env
+            echo "------------------------------------------------------------------"
             tar -C backend -czvf backend_artifact.tar.gz .
             echo "------------------------------------------------------------------"
             echo "pwd: $(pwd)"
