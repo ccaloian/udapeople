@@ -26,20 +26,28 @@
     src: backend_artifact.tar.gz
     dest: /home/ubuntu/backend/backend_artifact.tar.gz
 
-- name: Unpack dist files and prestart:prod
+- name: Unpack dist files and start the app
   become: true
   shell: |
     cd /home/ubuntu/backend
     tar -xzf backend_artifact.tar.gz
     rm backend_artifact.tar.gz
-    npm run prestart:prod
+    pm2 start npm -- run start
+
+# - name: Unpack dist files and prestart:prod
+#   become: true
+#   shell: |
+#     cd /home/ubuntu/backend
+#     tar -xzf backend_artifact.tar.gz
+#     rm backend_artifact.tar.gz
+#     npm run prestart:prod
         
-- name: Executing node
-  become: true
-  shell: |
-    cd /home/ubuntu/backend
-    pm2 start npm --name backend -- run start:prod
-    pm2 ls
+# - name: Executing node
+#   become: true
+#   shell: |
+#     cd /home/ubuntu/backend
+#     pm2 start npm --name backend -- run start:prod
+#     pm2 ls
 
 # - name: Copy backend dist files to remote server
 #   become: true
