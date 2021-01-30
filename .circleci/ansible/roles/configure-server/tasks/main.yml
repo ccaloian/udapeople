@@ -29,16 +29,17 @@
     production: yes
     state: present
 
-- name: "get application code"
-  git:
-    repo: https://github.com/ccaloian/udapeople.git
-    dest: /home/ubuntu/udapeople
+## Not needed to clone the repo and start the app with pm2
+# - name: "get application code"
+#   git:
+#     repo: https://github.com/ccaloian/udapeople.git
+#     dest: /home/ubuntu/udapeople
 
 # - name: "execute shell commands"
 #   shell: |
 #     echo "Hello World"
 
-- name: "executing node"
-  shell: |
-    cd /home/ubuntu/udapeople/backend
-    pm2 start npm -- run "start:dev"
+# - name: "executing node"
+#   shell: |
+#     cd /home/ubuntu/udapeople/backend
+#     pm2 start npm -- run "start:dev"

@@ -23,22 +23,21 @@
 
 - name: "Make dist dir"
   file:
-    path: /home/ubuntu/udapeople/backend/dist
+    path: /home/ubuntu/udapeople/backend
     state: directory
 
 - name: "Copy dist files"
   become: true
   copy:
     src: backend_artifact.tar.gz
-    dest: /home/ubuntu/udapeople/backend/dist/backend_artifact.tar.gz
+    dest: /home/ubuntu/backend/dist/backend_artifact.tar.gz
 
 - name: Unpack dist files and prestart:prod
   become: true
   shell: |
-    cd /home/ubuntu/udapeople/backend/dist
+    cd /home/ubuntu/backend
     tar -xzf backend_artifact.tar.gz
     rm backend_artifact.tar.gz
-    cd /home/ubuntu/udapeople/backend
     npm run prestart:prod
 
 # - name: Install Node modules
@@ -57,7 +56,7 @@
 - name: Executing node
   become: true
   shell: |
-    cd /home/ubuntu/udapeople/backend
+    cd /home/ubuntu/backend
     pm2 start npm --name backend -- start
     pm2 ls
 
@@ -65,7 +64,7 @@
   become: true
   shell: pm2 start main.js
   args:
-    chdir: /home/ubuntu/udapeople/backend/dist
+    chdir: /home/ubuntu/backend/dist
 
 # ---
 # - name: "update apt packages"
