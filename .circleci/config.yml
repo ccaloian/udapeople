@@ -338,14 +338,14 @@ jobs:
             # echo "--- cat curl_backend_out.txt -----------------------"
             # cat curl_backend_out.txt
             # if curl -s $API_URL > curl_backend_out.txt
-            echo ">>> printenv ---------------------------------------"
+            echo "--- printenv ---------------------------------------"
             printenv
-            echo "<<< printenv ---------------------------------------"
+            echo "--- printenv ---------------------------------------"
             echo "--- sleep 300 --------------------------------------"
             sleep 300
-            echo ">>> check endpoint ---------------------------------"
+            echo "--- check endpoint ---------------------------------"
             curl -S $API_URL
-            echo "<<< check endpoint ---------------------------------"
+            echo "--- check endpoint ---------------------------------"
             # if curl -s $API_URL
             # then
             #   exit 0
