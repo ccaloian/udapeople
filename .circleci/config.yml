@@ -53,16 +53,16 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build-2]
+          keys: [frontend-build-3]
       - run:
           name: Build front-end
           command: |
             cd frontend
-            npm i
+            npm install
             npm run build
       - save_cache:
           paths: [frontend/node_modules]
-          key: frontend-build-2
+          key: frontend-build-3
 
   build-backend:
     docker:
@@ -70,16 +70,16 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build-2]
+          keys: [backend-build-3]
       - run:
           name: Back-end build
           command: |
             cd backend
-            npm i
+            npm install
             npm run build
       - save_cache:
           paths: [backend/node_modules]
-          key: backend-build-2
+          key: backend-build-3
 
   test-frontend:
     docker:
@@ -87,7 +87,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build-2]
+          keys: [frontend-build-3]
       - run:
           name: Front-end test
           command: |
@@ -100,7 +100,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build-2]
+          keys: [backend-build-3]
       - run:
           name: Back-end test
           command: |
@@ -113,7 +113,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build-2]
+          keys: [frontend-build-3]
       - run:
           name: Scan frontend
           command: |
@@ -127,7 +127,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build-2]
+          keys: [backend-build-3]
       - run:
           name: Scan backend
           command: |
@@ -199,7 +199,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build-2]
+          keys: [backend-build-3]
       - run:
           name: Install dependencies
           command: |
@@ -228,9 +228,9 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # Add frontend-build-2 and remove the install+build steps below
+      # Add frontend-build-3 and remove the install+build steps below
       - restore_cache:
-          keys: [backend-build-2]
+          keys: [backend-build-3]
       - run:
           name: Install dependencies
           command: |
@@ -238,23 +238,29 @@ jobs:
             curl -sL https://rpm.nodesource.com/setup_14.x | bash -
             yum install -y nodejs
       - run:
-          name: Get backend url
+          name: Get backend url and deploy frontend objects
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            API_URL="http://${BACKEND_IP}:3030/api/status"
+            export API_URL="http://${BACKEND_IP}:3030/api/status"
             curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request PUT --data "$API_URL" https://api.memstash.io/values/api_url
             echo "API_URL: ${API_URL}"
-      - run:
-          name: Deploy frontend objects
-          command: |
+            echo "--- deploy frontend objects ---"
             cd frontend
             npm install
             npm run build
             cd dist
             aws s3 sync . s3://udapeople-"${CIRCLE_WORKFLOW_ID}" --delete
+      # - run:
+      #     name: Deploy frontend objects
+      #     command: |
+      #       cd frontend
+      #       npm install
+      #       npm run build
+      #       cd dist
+      #       aws s3 sync . s3://udapeople-"${CIRCLE_WORKFLOW_ID}" --delete
       - destroy-environment
       - revert-migrations
                     
@@ -304,7 +310,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build-2]
+          keys: [backend-build-3]
       - run:
           name: Install dependencies
           command: |
@@ -332,15 +338,20 @@ jobs:
             # echo "--- cat curl_backend_out.txt -----------------------"
             # cat curl_backend_out.txt
             # if curl -s $API_URL > curl_backend_out.txt
-            echo "--- sleep 600 --------------------------------------"
-            sleep 600
-            echo "--- check endpoint ---------------------------------"
-            if curl -s $API_URL
-            then
-              exit 0
-            else
-              exit 1
-            fi
+            echo ">>> printenv ---------------------------------------"
+            printenv
+            echo "<<< printenv ---------------------------------------"
+            echo "--- sleep 300 --------------------------------------"
+            sleep 300
+            echo ">>> check endpoint ---------------------------------"
+            curl -S $API_URL
+            echo "<<< check endpoint ---------------------------------"
+            # if curl -s $API_URL
+            # then
+            #   exit 0
+            # else
+            #   exit 1
+            # fi
       - destroy-environment
       - revert-migrations
 
