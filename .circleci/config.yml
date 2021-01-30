@@ -280,7 +280,6 @@ jobs:
             npm run build
             cd ..
             tar -C backend -czvf backend_artifact.tar.gz .
-            cd ..
             echo "------------------------------------------------------------------"
             echo "pwd: $(pwd)"
             echo "------------------------------------------------------------------"
@@ -292,7 +291,7 @@ jobs:
             echo "------------------------------------------------------------------"
             find . -name "backend_artifact.tar.gz"
             echo "------------------------------------------------------------------"
-            mv backend/backend_artifact.tar.gz .circleci/ansible/roles/deploy/files
+            mv backend_artifact.tar.gz .circleci/ansible/roles/deploy/files
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
       - revert-migrations

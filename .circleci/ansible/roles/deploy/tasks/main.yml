@@ -23,14 +23,14 @@
 
 - name: "Make dist dir"
   file:
-    path: /home/ubuntu/udapeople/backend
+    path: /home/ubuntu/backend
     state: directory
 
 - name: "Copy dist files"
   become: true
   copy:
     src: backend_artifact.tar.gz
-    dest: /home/ubuntu/backend/dist/backend_artifact.tar.gz
+    dest: /home/ubuntu/backend/backend_artifact.tar.gz
 
 - name: Unpack dist files and prestart:prod
   become: true
@@ -57,14 +57,14 @@
   become: true
   shell: |
     cd /home/ubuntu/backend
-    pm2 start npm --name backend -- start
+    pm2 start npm --name backend -- run start
     pm2 ls
 
-- name: start pm2 for dist/main.js
-  become: true
-  shell: pm2 start main.js
-  args:
-    chdir: /home/ubuntu/backend/dist
+# - name: start pm2 for dist/main.js
+#   become: true
+#   shell: pm2 start main.js
+#   args:
+#     chdir: /home/ubuntu/backend/dist
 
 # ---
 # - name: "update apt packages"
