@@ -15,12 +15,6 @@
     production: yes
     state: present
 
-# - name: Copy backend dist files to remote server
-#   become: true
-#   copy:
-#     src: /root/project/backend
-#     dest: /home/ubuntu
-
 - name: "Make dist dir"
   file:
     path: /home/ubuntu/backend
@@ -39,6 +33,19 @@
     tar -xzf backend_artifact.tar.gz
     rm backend_artifact.tar.gz
     npm run prestart:prod
+        
+- name: Executing node
+  become: true
+  shell: |
+    cd /home/ubuntu/backend
+    pm2 start npm --name backend -- run start:prod
+    pm2 ls
+
+# - name: Copy backend dist files to remote server
+#   become: true
+#   copy:
+#     src: /root/project/backend
+#     dest: /home/ubuntu
 
 # - name: Install Node modules
 #   become: true
@@ -52,13 +59,6 @@
 #     cd /home/ubuntu/udapeople/backend
 #     npm run build
 #     npm run prestart:prod
-        
-- name: Executing node
-  become: true
-  shell: |
-    cd /home/ubuntu/backend
-    pm2 start npm --name backend -- run start
-    pm2 ls
 
 # - name: start pm2 for dist/main.js
 #   become: true

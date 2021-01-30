@@ -119,7 +119,7 @@ jobs:
           command: |
             cd frontend
             npm audit fix --audit-level=critical --force
-            # npm audit --audit-level=critical
+            npm audit --audit-level=critical
 
   scan-backend:
     docker:
@@ -133,7 +133,7 @@ jobs:
           command: |
             cd backend
             npm audit fix --audit-level=critical --force
-            # npm audit --audit-level=critical || true
+            npm audit --audit-level=critical || true
 
   deploy-infrastructure:
     docker:
@@ -328,12 +328,14 @@ jobs:
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
             echo "Backend API_URL: $API_URL"
-            curl -s $API_URL > curl_backend_out.txt
-            echo "----------------------------------------------------"
-            cat curl_backend_out.txt
+            # curl -s $API_URL > curl_backend_out.txt
+            # echo "--- cat curl_backend_out.txt -----------------------"
+            # cat curl_backend_out.txt
+            # if curl -s $API_URL > curl_backend_out.txt
             echo "--- sleep 600 --------------------------------------"
             sleep 600
-            if curl -s $API_URL > curl_backend_out.txt
+            echo "--- check endpoint ---------------------------------"
+            if curl -s $API_URL
             then
               exit 0
             else
