@@ -39,11 +39,11 @@
     npm run build
     npm run prestart:prod
 
-- name: Stop old backend process
-  become: true
-  shell: |
-    pm2 stop backend
-    pm2 delete backend
+# - name: Stop old backend process
+#   become: true
+#   shell: |
+#     pm2 stop --silent backend
+#     pm2 delete --silent backend
 
 - name: Start the app backend
   become: true
