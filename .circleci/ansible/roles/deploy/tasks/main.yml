@@ -1,5 +1,4 @@
 ---
-
 - name: "install dependencies."
   become: true
   apt:
@@ -15,7 +14,7 @@
     production: yes
     state: present
 
-- name: "Make dist dir"
+- name: "Make backend dir"
   file:
     path: /home/ubuntu/backend
     state: directory
@@ -32,195 +31,21 @@
     cd /home/ubuntu/backend
     tar -xzf backend_artifact.tar.gz
     rm backend_artifact.tar.gz
-    pm2 start npm -- run start
 
-# - name: Unpack dist files and prestart:prod
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/backend
-#     tar -xzf backend_artifact.tar.gz
-#     rm backend_artifact.tar.gz
-#     npm run prestart:prod
-        
-# - name: Executing node
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/backend
-#     pm2 start npm --name backend -- run start:prod
-#     pm2 ls
+- name: Build backend and prestart:prod
+  become: true
+  shell: |
+    cd /home/ubuntu/backend
+    npm run build
+    npm run prestart:prod
 
-# - name: Copy backend dist files to remote server
-#   become: true
-#   copy:
-#     src: /root/project/backend
-#     dest: /home/ubuntu
+- name: Stop old backend process
+  become: true
+  shell: |
+    pm2 stop backend
+    pm2 delete backend
 
-# - name: Install Node modules
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/udapeople/backend
-#     npm install
-
-# - name: Building backend service
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/udapeople/backend
-#     npm run build
-#     npm run prestart:prod
-
-# - name: start pm2 for dist/main.js
-#   become: true
-#   shell: pm2 start main.js
-#   args:
-#     chdir: /home/ubuntu/backend/dist
-
-# ---
-# - name: "update apt packages"
-#   become: yes
-#   apt:
-#     update_cache: yes
-
-# - name: "upgrade packages"
-#   become: yes
-#   apt:
-#     upgrade: "yes"
-
-# - name: "remove dependencies that are no longer required"
-#   become: yes
-#   apt:
-#     autoremove: yes
-
-# #- name: "install dependencies"
-# #  become: yes
-# #  apt:
-# #    name: ["nodejs", "npm", "tar"]
-# #    state: latest
-# #    update_cache: yes
-
-# #- name: "install node"
-# #  become: yes
-# #  shell: |
-# #    apt-get install -y build-essential
-# #    apt-get install -y curl openssl libssl-dev
-# #    git clone https://github.com/joyent/node.git
-# #    cd node
-# #    git checkout v0.10.24
-# #    ./configure
-# #    make
-# #    make install
-
-# #- name: "install pm2"
-# #  become: yes
-# #  npm:
-# #    name: pm2
-# #    global: yes
-# #    production: yes
-# #    state: present
-
-# #- name: "get application code"
-# #  git:
-# #    repo: https://github.com/ccaloian/udapeople.git
-# #    dest: /home/ubuntu/udapeople
-
-
-# #- name: "upgrade packages."
-# #  become: true
-# #  apt:
-# #    upgrade: "yes"
-
-# #- name: "install nodejs"
-# #  become: true
-# #  shell: |
-# #    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
-# #    . ~/.nvm/nvm.sh
-# #    nvm install node
-# #    node -e "console.log('Running Node.js ' + process.version)"
-
-# #- name: "install dependencies."
-# #  become: true
-# #  apt:
-# #    name: ["tar"]
-# #    state: latest
-# #    update_cache: yes
-
-# - name: "Make dist dir"
-#   file:
-#     path: /home/ubuntu/dist
-#     state: directory
-
-# - name: "Copy dist files"
-#   become: true
-#   copy:
-#     src: backend_artifact.tar.gz
-#     dest: /home/ubuntu/dist/backend_artifact.tar.gz
-
-# - name: Unpack dist files and prestart:prod
-#   become: true
-#   shell: |
-#     cd dist
-#     tar -xzf backend_artifact.tar.gz
-#     rm backend_artifact.tar.gz
-#     npm run prestart:prod
-        
-# - name: Executing node
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/dist
-#     pm2 start npm --name backend -- start
-#     pm2 ls
-
-# - name: start pm2 for dist/main.js
-#   become: no
-#   shell: pm2 start main.js
-#   args:
-#     chdir: /home/ubuntu/dist
-
-
-# #- name: Delete old pm2 process
-# #  become: true
-# #  command: pm2 delete app
-# #  ignore_errors: yes
-
-# # old pm2 command: pm2 start -x -i 4 --name "app" /home/ubuntu/dist/main.js
-# # - name: Executing node
-# #   become: true
-# #   shell: |
-# #     pm2 start npm -- run start
-
-
-
-# # ---
-# # - name: "upgrade packages."
-# #   become: true
-# #   apt:
-# #     upgrade: "yes"
-
-# # - name: "install dependencies."
-# #   become: true
-# #   apt:
-# #     name: ["nodejs", "npm", "tar"]
-# #     state: latest
-# #     update_cache: yes
-
-# # - name: "Copy dist files"
-# #   become: true
-# #   copy:
-# #     src: backend_artifact.tar.gz
-# #     dest: ./dist
-
-# # - name: "Unpack dist files"
-# #   become: true
-# #   shell: |
-# #     cd dist
-# #     tar -xzf backend_artifact.tar.gz
-# #     rm backend_artifact.tar.gz
-
-# # - name: Delete old pm2 process
-# #   become: true
-# #   command: pm2 delete app
-# #   ignore_errors: yes
-
-# # - name: Executing node
-# #   become: true
-# #   shell: |
-# #     pm2 start -x -i 4 --name "app" ./dist/main.js
+- name: Start the app backend
+    cd /home/ubuntu/backend
+    pm2 start npm --name backend -- run start
+    pm2 ls

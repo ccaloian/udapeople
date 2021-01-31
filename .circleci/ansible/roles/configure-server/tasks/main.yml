@@ -14,7 +14,14 @@
   apt:
     autoremove: yes
 
-- name: "install dependencies"
+- name: "install python3"
+  become: yes
+  apt:
+    name: "python3"
+    state: present
+    update_cache: yes
+
+- name: "install nodejs and npm"
   become: yes
   apt: 
     name: ["nodejs", "npm"]
@@ -24,22 +31,7 @@
 - name: "install pm2"
   become: yes
   npm:
-    name: pm2
+    name: "pm2"
     global: yes
     production: yes
     state: present
-
-## Not needed to clone the repo and start the app with pm2
-# - name: "get application code"
-#   git:
-#     repo: https://github.com/ccaloian/udapeople.git
-#     dest: /home/ubuntu/udapeople
-
-# - name: "execute shell commands"
-#   shell: |
-#     echo "Hello World"
-
-# - name: "executing node"
-#   shell: |
-#     cd /home/ubuntu/udapeople/backend
-#     pm2 start npm -- run "start:dev"

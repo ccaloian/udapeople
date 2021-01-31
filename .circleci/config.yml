@@ -43,6 +43,7 @@ commands:
             then
               cd ~/project/backend
               npm install
+              npm run build
               npm run migrations:revert
             fi
          
@@ -188,9 +189,11 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ls -la ~/
             echo ENVIROMENT=production > "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
             echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
             echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
@@ -199,8 +202,7 @@ jobs:
             echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "backend/.env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
-            cat ~/project/.circleci/ansible/inventory.txt
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment
 
   run-migrations:
@@ -238,7 +240,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # Add frontend-build-3 and remove the install+build steps below
       - restore_cache:
           keys: [backend-build-3]
       - run:
@@ -256,27 +257,23 @@ jobs:
               --output text)
             export API_URL="http://${BACKEND_IP}:3030/api/status"
             curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request PUT --data "$API_URL" https://api.memstash.io/values/api_url
+            echo "--- API_URL --------------------------------------"
             echo "API_URL: ${API_URL}"
-            echo "--- deploy frontend objects ---"
+            echo "--------------------------------------------------"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
             cd frontend
             npm install
             npm run build
             cd dist
             aws s3 sync . s3://udapeople-"${CIRCLE_WORKFLOW_ID}" --delete
-      # - run:
-      #     name: Deploy frontend objects
-      #     command: |
-      #       cd frontend
-      #       npm install
-      #       npm run build
-      #       cd dist
-      #       aws s3 sync . s3://udapeople-"${CIRCLE_WORKFLOW_ID}" --delete
       - destroy-environment
       - revert-migrations
                     
   deploy-backend:
     docker:
-      # FIXME: is node image enough?
       - image: python:3.7-alpine3.11
     steps:
       - checkout
@@ -297,10 +294,13 @@ jobs:
             npm install
             npm run build
             cd ..
-            echo "------------------------------------------------------------------"
+            echo "--- add env vars --------------------------------------------------"
             echo ENVIROMENT=production > "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
             echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
             echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
@@ -313,18 +313,8 @@ jobs:
             echo "------------------------------------------------------------------"
             tar -C backend -czvf backend_artifact.tar.gz .
             echo "------------------------------------------------------------------"
-            echo "pwd: $(pwd)"
-            echo "------------------------------------------------------------------"
-            ls -la
-            echo "--- ~/project ----------------------------------------------------"
-            ls -la ~/project
-            echo "--- ~/project/backend --------------------------------------------"
-            ls -la ~/project/backend
-            echo "------------------------------------------------------------------"
-            find . -name "backend_artifact.tar.gz"
-            echo "------------------------------------------------------------------"
             mv backend_artifact.tar.gz .circleci/ansible/roles/deploy/files
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
       - revert-migrations
 
@@ -345,8 +335,13 @@ jobs:
           name: Frontend smoke test.
           command: |
             export URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-west-2.amazonaws.com"
+            echo "--- Frontend URL -----------------------------------"
             echo "Frontend URL: $URL"
+            echo "----------------------------------------------------"
             curl -s ${URL} > curl_frontend_out.txt
+            echo "--- cat curl_frontend_out.txt ----------------------"
+            cat curl_frontend_out.txt
+            echo "----------------------------------------------------"
             if [[ $(cat curl_frontend_out.txt) =~ "Welcome" ]]
             then
               exit 0
@@ -357,25 +352,19 @@ jobs:
           name: Get backend url and run smoke test
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
+            echo "--- Backend URL ------------------------------------"
             echo "Backend API_URL: $API_URL"
-            # curl -s $API_URL > curl_backend_out.txt
-            # echo "--- cat curl_backend_out.txt -----------------------"
-            # cat curl_backend_out.txt
-            # if curl -s $API_URL > curl_backend_out.txt
-            echo "--- printenv ---------------------------------------"
-            printenv
-            echo "--- printenv ---------------------------------------"
-            echo "--- sleep 300 --------------------------------------"
-            sleep 300
-            echo "--- check endpoint ---------------------------------"
-            curl -S $API_URL
-            echo "--- check endpoint ---------------------------------"
-            # if curl -s $API_URL
-            # then
-            #   exit 0
-            # else
-            #   exit 1
-            # fi
+            echo "----------------------------------------------------"
+            curl -s $API_URL > curl_backend_out.txt
+            echo "--- cat curl_backend_out.txt -----------------------"
+            cat curl_backend_out.txt
+            echo "----------------------------------------------------"
+            if [[ $(cat curl_backend_out.txt) =~ '"status":"ok"' ]]
+            then
+              exit 0
+            else
+              exit 1
+            fi
       - destroy-environment
       - revert-migrations
 
