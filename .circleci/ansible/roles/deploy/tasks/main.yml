@@ -46,6 +46,8 @@
     pm2 delete backend
 
 - name: Start the app backend
+  become: true
+  shell: |
     cd /home/ubuntu/backend
     pm2 start npm --name backend -- run start
     pm2 ls
