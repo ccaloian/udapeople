@@ -240,8 +240,10 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build-4]
+      # - restore_cache:
+      #     keys: [frontend-build-4]
+      - attach_workspace:
+          at: /~
       - run:
           name: Install dependencies
           command: |
@@ -255,7 +257,7 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            export API_URL="http://${BACKEND_IP}:3030/api/status"
+            export API_URL="http://${BACKEND_IP}:3030"
             curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request PUT --data "$API_URL" https://api.memstash.io/values/api_url
             echo "--- API_URL --------------------------------------"
             echo "API_URL: ${API_URL}"
@@ -264,6 +266,12 @@ jobs:
           name: Deploy frontend objects
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
+            echo ENVIRONMENT=production > "frontend/.env"
+            echo NODE_ENV=production >> "frontend/.env"
+            echo API_URIL=$API_URL >> "frontend/.env"
+            echo "--- frontend/.env --------------------------------"
+            cat frontend/.env
+            echo "--------------------------------------------------"
             cd frontend
             npm install
             npm run build
@@ -352,10 +360,11 @@ jobs:
           name: Get backend url and run smoke test
           command: |
             export API_URL=$(curl -H "Content-Type: text/plain" -H "token:api_url_${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/api_url)
+            export STATUS_URL="${API_URL}/api/status"
             echo "--- Backend URL ------------------------------------"
-            echo "Backend API_URL: $API_URL"
+            echo "Backend STATUS_URL: $STATUS_URL"
             echo "----------------------------------------------------"
-            curl -s $API_URL > curl_backend_out.txt
+            curl -s $STATUS_URL > curl_backend_out.txt
             echo "--- cat curl_backend_out.txt -----------------------"
             cat curl_backend_out.txt
             echo "----------------------------------------------------"
