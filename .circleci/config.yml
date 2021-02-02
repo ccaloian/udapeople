@@ -433,7 +433,7 @@ jobs:
             #     --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID}" \
             aws cloudformation update-stack \
                 --use-previous-template \
-                --stack-name udapeople-cloudfront-${OldWorkflowID} \
+                --stack-name udapeople-cloudfront-2a83fc8ad67f60a6 \
                 --parameters ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID},UsePreviousValue=false
       - destroy-environment
       - revert-migrations

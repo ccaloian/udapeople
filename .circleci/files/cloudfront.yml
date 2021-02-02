@@ -38,8 +38,13 @@ Outputs:
     Value: !Sub ${WorkflowID}
     Export:
       Name: WorkflowID
-  DomainName:
+  S3URL:
     Description: URL for website hosted on S3
     Value: !Sub "udapeople-${WorkflowID}.s3.amazonaws.com"
+    Export:
+      Name: S3URL
+  DomainName:
+    Description: Cloudfront Domain
+    Value: !GetAtt CloudFrontDistribution.DomainName
     Export:
       Name: DomainName
