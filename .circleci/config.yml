@@ -444,36 +444,50 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       - configure-infrastructure:
           requires: [deploy-infrastructure]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       - run-migrations:
           requires: [configure-infrastructure]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       - deploy-frontend:
           requires: [run-migrations]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       - deploy-backend:
           requires: [run-migrations]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       - cloudfront-update:
           requires: [smoke-test]
           filters:
             branches:
-              only: [/pre-prod(?:-.+)?$/, main]
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       # - cleanup:
       #     requires: [cloudfront-update]
