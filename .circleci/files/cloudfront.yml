@@ -45,6 +45,6 @@ Outputs:
       Name: S3URL
   DomainName:
     Description: Cloudfront Domain
-    Value: !GetAtt CloudFrontDistribution.DomainName
+    Value: !GetAtt WebpageCDN.DomainName
     Export:
       Name: DomainName
