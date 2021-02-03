@@ -361,7 +361,7 @@ jobs:
       - run:
           name: Get backend url and run smoke test
           command: |
-            export API_URL=$(curl \
+            export API_URL=$(curl -s \
                 -H "Content-Type: text/plain" \
                 -H "token:api_url_${CIRCLE_WORKFLOW_ID}" \
                 --request GET https://api.memstash.io/values/api_url)
@@ -403,7 +403,7 @@ jobs:
       - run:
           name: Update cloudfront distribution
           command: |
-            OldWorkflowID=$(curl \
+            OldWorkflowID=$(curl -s \
                 -H "Content-Type: text/plain" \
                 -H "token:workflow_id_${CIRCLE_WORKFLOW_ID}" \
                 --request GET https://api.memstash.io/values/workflow_id)
@@ -509,10 +509,10 @@ workflows:
               only: 
                 - main
                 - /pre-prod(?:-.+)?$/
-      # - cleanup:
-      #     requires: [cloudfront-update]
-      #     filters:
-      #       branches:
-      #         only: 
-      #           - main
-      #           - /pre-prod(?:-.+)?$/
+      - cleanup:
+          requires: [cloudfront-update]
+          filters:
+            branches:
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
