@@ -354,7 +354,7 @@ jobs:
             curl -s ${URL} > curl_frontend_out.txt
             if [[ $(cat curl_frontend_out.txt) =~ "Welcome" ]]
             then
-              exit 1
+              exit 0
             else
               exit 1
             fi
@@ -502,13 +502,13 @@ workflows:
               only: 
                 - main
                 - /pre-prod(?:-.+)?$/
-      # - cloudfront-update:
-      #     requires: [smoke-test]
-      #     filters:
-      #       branches:
-      #         only: 
-      #           - main
-      #           - /pre-prod(?:-.+)?$/
+      - cloudfront-update:
+          requires: [smoke-test]
+          filters:
+            branches:
+              only: 
+                - main
+                - /pre-prod(?:-.+)?$/
       # - cleanup:
       #     requires: [cloudfront-update]
       #     filters:
