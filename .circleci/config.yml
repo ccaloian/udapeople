@@ -354,7 +354,7 @@ jobs:
             curl -s ${URL} > curl_frontend_out.txt
             if [[ $(cat curl_frontend_out.txt) =~ "Welcome" ]]
             then
-              exit 0
+              exit 1
             else
               exit 1
             fi
@@ -366,6 +366,9 @@ jobs:
                 -H "token:api_url_${CIRCLE_WORKFLOW_ID}" \
                 --request GET https://api.memstash.io/values/api_url)
             export STATUS_URL="${API_URL}/api/status"
+            echo "--- Backend URL _-----------------------------------"
+            echo "Backend URL: $STATUS_URL"
+            echo "----------------------------------------------------"
             curl -s $STATUS_URL > curl_backend_out.txt
             if [[ $(cat curl_backend_out.txt) =~ '"status":"ok"' ]]
             then
@@ -499,17 +502,17 @@ workflows:
               only: 
                 - main
                 - /pre-prod(?:-.+)?$/
-      - cloudfront-update:
-          requires: [smoke-test]
-          filters:
-            branches:
-              only: 
-                - main
-                - /pre-prod(?:-.+)?$/
-      - cleanup:
-          requires: [cloudfront-update]
-          filters:
-            branches:
-              only: 
-                - main
-                - /pre-prod(?:-.+)?$/
+      # - cloudfront-update:
+      #     requires: [smoke-test]
+      #     filters:
+      #       branches:
+      #         only: 
+      #           - main
+      #           - /pre-prod(?:-.+)?$/
+      # - cleanup:
+      #     requires: [cloudfront-update]
+      #     filters:
+      #       branches:
+      #         only: 
+      #           - main
+      #           - /pre-prod(?:-.+)?$/
