@@ -1,0 +1,5 @@
+URL01: https://github.com/ccaloian/udapeople/tree/submission
+URL02: http://udapeople-0472898d-2519-492b-81b3-3a52031dda55.s3-us-west-2.amazonaws.com/index.html#/employees
+URL03: d3kj0w00j6yb20.cloudfront.net
+URL04: http://34.221.55.228:3030/api/status
+URL05: http://ec2-34-209-153-7.us-west-2.compute.amazonaws.com:9090/targets
